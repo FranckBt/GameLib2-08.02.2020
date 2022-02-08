@@ -1,6 +1,6 @@
 <form action="index.php?page=inscription" method="post" enctype="multipart/form-data">
     <ul>
-        <li><label for="name">Nom :</label><input type="text" id="name" name="name" value="<?php echo $name;?>" /></li>
+        <li><label for="name">Nom :</label><input type="text" id="name" name="name" value="<?php echo  $name;?>" /></li>
         <li><label for="firstname">Prénom :</label><input type="text" id="firstname" name="firstname"  value="<?php echo $firstname;?>" /></li>
         <li><label for="email">e-mail :</label><input type="text" id="email" name="email"  value="<?php echo $email;?>" /></li>
         <li><label for="pseudo">Pseudo :</label><input type="text" id="pseudo" name="pseudo"  value="<?php echo $pseudo;?>" /></li>

@@ -1,8 +1,8 @@
 <h1>Inscription</h1>
 <?php
 if (isset($_POST['inscription'])) {
-    $name = mb_strtoupper(trim($_POST['name'])) ?? '';
-    $firstname = ucfirst(mb_strtolower(trim($_POST['firstname']))) ?? '';
+    $name = htmlentities(mb_strtoupper(trim($_POST['name']))) ?? '';
+    $firstname = htmlentities(ucfirst(mb_strtolower(trim($_POST['firstname'])))) ?? '';
     $email = mb_strtolower(trim($_POST['email'])) ?? '';
     $password = htmlentities(trim($_POST['password'])) ?? '';
     $passwordverif = htmlentities(trim($_POST['passwordverif'])) ?? '';
@@ -11,11 +11,17 @@ if (isset($_POST['inscription'])) {
 
     $erreur = array();
 
-    if (preg_match('/(*UTF8)^[[:alpha:]]+$/', $name) !== 1)
+    if (preg_match('/(*UTF8)^[[:alpha:]]+$/', html_entity_decode($name) ) !== 1)
         array_push($erreur, "Veuillez saisir votre nom");
 
-    if (preg_match('/(*UTF8)^[[:alpha:]]+$/', $firstname) !== 1)
+        else
+        $name = html_entity_decode($name);
+
+    if (preg_match('/(*UTF8)^[[:alpha:]]+$/', html_entity_decode( $firstname)) !== 1)
         array_push($erreur, "Veuillez saisir votre prénom");
+
+        else
+        $firstname = html_entity_decode($firstname);
 
     if (!filter_var($email, FILTER_VALIDATE_EMAIL))
         array_push($erreur, "Veuillez saisir un e-mail valide");
@@ -45,13 +51,41 @@ if (isset($_POST['inscription'])) {
             $date = date('Ymdhis');
             $fileName = $date . $fileName;
             if (move_uploaded_file($fileTmpName, $path . $fileName))
-                echo "Fichier déplacé"; 
+                    echo "Fichier déplacé"; 
+                $fileName = $path . $fileName;
+                $fileName = str_replace("\\", "/", $fileName, );
         }
         else {
             array_push($erreur, "Erreur type MIME");
         }
     } else {
-        array_push($erreur, "Erreur upload " . $_FILES['avatar']['error']);
+        $fileUploadError = $_FILES['avatar']['error'];
+        $fileUploadErrorMessage = '';
+        switch($fileUploadError) {
+            case 1 :
+                $fileUploadErrorMessage = "La taille du fichier téléchargé excède la valeur de upload_max_filesize.";
+            break;
+            case 2 :
+                $fileUploadErrorMessage = "La taille du fichier téléchargé excède la valeur de MAX_FILE_SIZE, qui a été spécifiée dans le formulaire HTML.";
+            break;
+            case 3 :
+                $fileUploadErrorMessage = "Le fichier n'a été que partiellement téléchargé.";
+            break;
+            case 4 :
+                $fileUploadErrorMessage = "Aucun fichier n'a été téléchargé.";
+            break;
+            case 6 :
+                $fileUploadErrorMessage = "Un dossier temporaire est manquant.";
+            break;
+            case 7 :
+                $fileUploadErrorMessage = "Échec de l'écriture du fichier sur le disque.";
+            break;
+            case 8 :
+                $fileUploadErrorMessage = "Une extension PHP a arrêté l'envoi de fichier.";
+            break;
+            }
+            
+            array_push($erreur, "Erreur upload : " . $fileUploadErrorMessage);
     }
 
     if (count($erreur) === 0) {
@@ -72,9 +106,9 @@ if (isset($_POST['inscription'])) {
 
             $id = null;
             $query->bindParam(':id', $id);
-            $query->bindParam(':nom', $name);
-            $query->bindParam(':prenom', $firstname);
-            $query->bindParam(':mail', $email);
+            $query->bindParam(':nom', $name, PDO::PARAM_STR_CHAR);
+            $query->bindParam(':prenom', $firstname, PDO::PARAM_STR_CHAR);
+            $query->bindParam(':mail', $email, PDO::PARAM_STR_CHAR);
             $query->bindParam(':pseudo', $pseudo);
             $query->bindParam(':mdp', $password);
             $query->bindParam(':bio', $bio);
